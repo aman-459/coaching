@@ -1,0 +1,81 @@
+<% layout('layouts/boilerplate') -%>
+
+<div class="flex justify-between items-center mb-6">
+  <div>
+    <h1 class="text-2xl font-bold text-slate-800">Students</h1>
+    <p class="text-sm text-slate-500">Total <%= students.length %> students enrolled</p>
+  </div>
+  <a href="/students/new" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition">
+    + Enroll Student
+  </a>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-sm text-slate-600">
+      <thead class="bg-slate-50 text-slate-700 uppercase font-semibold text-xs border-b border-slate-200">
+        <tr>
+          <th class="px-6 py-4">Student</th>
+          <th class="px-6 py-4">Contact</th>
+          <th class="px-6 py-4">Batch</th>
+          <th class="px-6 py-4">Fee Status</th>
+          <th class="px-6 py-4 text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        <% if (students.length === 0) { %>
+          <tr>
+            <td colspan="5" class="px-6 py-8 text-center text-slate-400">
+              No students enrolled yet.
+            </td>
+          </tr>
+        <% } %>
+
+        <% students.forEach(student => { %>
+          <tr class="hover:bg-slate-50/50 transition">
+            <td class="px-6 py-4 font-medium text-slate-900">
+              <%= student.name %>
+            </td>
+            <td class="px-6 py-4">
+              <div>📞 <%= student.phone %></div>
+              <% if (student.parentPhone) { %>
+                <div class="text-xs text-slate-400">P: <%= student.parentPhone %></div>
+              <% } %>
+            </td>
+            <td class="px-6 py-4">
+              <% if (student.batch) { %>
+                <span class="bg-indigo-50 text-indigo-700 px-2 py-1 rounded text-xs font-medium">
+                  <%= student.batch.name %>
+                </span>
+              <% } else { %>
+                <span class="text-xs text-slate-400">No Batch</span>
+              <% } %>
+            </td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= student.feesStatus === 'Paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' %>">
+                <%= student.feesStatus %>
+              </span>
+            </td>
+            <td class="px-6 py-4 text-right space-x-2">
+              <form action="/students/<%= student._id %>/toggle-fee?_method=PATCH" method="POST" class="inline">
+                <button type="submit" class="text-xs font-semibold px-2 py-1 rounded border border-slate-200 hover:bg-slate-100 text-slate-700 transition">
+                  <%= student.feesStatus === 'Paid' ? 'Mark Pending' : 'Mark Paid' %>
+                </button>
+              </form>
+
+              <a href="/students/<%= student._id %>/edit" class="text-xs font-semibold px-2.5 py-1.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 inline-block">
+                Edit
+              </a>
+
+              <form action="/students/<%= student._id %>?_method=DELETE" method="POST" class="inline" onsubmit="return confirm('Delete this student?');">
+                <button type="submit" class="text-xs font-semibold px-2 py-1 rounded text-rose-600 hover:bg-rose-50 border border-transparent">
+                  Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>

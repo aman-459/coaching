@@ -1,0 +1,53 @@
+<% layout('layouts/boilerplate') -%>
+
+<div class="max-w-xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-slate-100">
+  <h1 class="text-xl font-bold text-slate-800 mb-6">Enroll New Student</h1>
+
+  <form action="/students" method="POST" class="space-y-4">
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1" for="name">Student Name</label>
+      <input type="text" id="name" name="name" required placeholder="e.g. Rahul Sharma"
+        class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1" for="phone">Student Phone</label>
+        <input type="tel" id="phone" name="phone" required placeholder="9876543210"
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1" for="parentPhone">Parent Phone</label>
+        <input type="tel" id="parentPhone" name="parentPhone" placeholder="9876543211"
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1" for="batchId">Select Batch</label>
+      <select id="batchId" name="batchId" required
+        class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+        <option value="" disabled selected>-- Choose a batch --</option>
+        <% batches.forEach(batch => { %>
+          <option value="<%= batch._id %>"><%= batch.name %> (<%= batch.subject %>)</option>
+        <% }) %>
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1" for="feesStatus">Initial Fee Status</label>
+      <select id="feesStatus" name="feesStatus"
+        class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+        <option value="Pending" selected>Pending</option>
+        <option value="Paid">Paid</option>
+      </select>
+    </div>
+
+    <div class="flex justify-end gap-3 pt-4">
+      <a href="/students" class="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-600 hover:bg-slate-50">Cancel</a>
+      <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium shadow-sm transition">
+        Enroll Student
+      </button>
+    </div>
+  </form>
+</div>
