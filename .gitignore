@@ -1,5 +1,19 @@
+# Dependencies
 node_modules/
+
+# Secrets & Environment
 .env
-.env.*
-!.env.example
+.env.local
+
+# Logs
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Build output
+dist/
+build/
