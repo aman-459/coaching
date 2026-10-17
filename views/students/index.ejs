@@ -1,13 +1,10 @@
 <% layout('layouts/boilerplate') -%>
-
 <div class="flex justify-between items-center mb-6">
   <div>
-    <h1 class="text-2xl font-bold text-slate-800">Students</h1>
-    <p class="text-sm text-slate-500">Total <%= students.length %> students enrolled</p>
+    <h1 class="text-2xl font-bold text-slate-800">Students Directory</h1>
+    <p class="text-sm text-slate-500">Total <%= students.length %> active students</p>
   </div>
-  <a href="/students/new" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition">
-    + Enroll Student
-  </a>
+  <a href="/students/new" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition">+ Enroll Student</a>
 </div>
 
 <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
@@ -25,17 +22,12 @@
       <tbody class="divide-y divide-slate-100">
         <% if (students.length === 0) { %>
           <tr>
-            <td colspan="5" class="px-6 py-8 text-center text-slate-400">
-              No students enrolled yet.
-            </td>
+            <td colspan="5" class="px-6 py-8 text-center text-slate-400">No students enrolled yet.</td>
           </tr>
         <% } %>
-
         <% students.forEach(student => { %>
           <tr class="hover:bg-slate-50/50 transition">
-            <td class="px-6 py-4 font-medium text-slate-900">
-              <%= student.name %>
-            </td>
+            <td class="px-6 py-4 font-medium text-slate-900"><%= student.name %></td>
             <td class="px-6 py-4">
               <div>📞 <%= student.phone %></div>
               <% if (student.parentPhone) { %>
@@ -44,9 +36,7 @@
             </td>
             <td class="px-6 py-4">
               <% if (student.batch) { %>
-                <span class="bg-indigo-50 text-indigo-700 px-2 py-1 rounded text-xs font-medium">
-                  <%= student.batch.name %>
-                </span>
+                <span class="bg-indigo-50 text-indigo-700 px-2 py-1 rounded text-xs font-medium"><%= student.batch.name %></span>
               <% } else { %>
                 <span class="text-xs text-slate-400">No Batch</span>
               <% } %>
@@ -62,15 +52,9 @@
                   <%= student.feesStatus === 'Paid' ? 'Mark Pending' : 'Mark Paid' %>
                 </button>
               </form>
-
-              <a href="/students/<%= student._id %>/edit" class="text-xs font-semibold px-2.5 py-1.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 inline-block">
-                Edit
-              </a>
-
+              <a href="/students/<%= student._id %>/edit" class="text-xs font-semibold px-2.5 py-1.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 inline-block">Edit</a>
               <form action="/students/<%= student._id %>?_method=DELETE" method="POST" class="inline" onsubmit="return confirm('Delete this student?');">
-                <button type="submit" class="text-xs font-semibold px-2 py-1 rounded text-rose-600 hover:bg-rose-50 border border-transparent">
-                  Delete
-                </button>
+                <button type="submit" class="text-xs font-semibold px-2 py-1 rounded text-rose-600 hover:bg-rose-50 border border-transparent">Delete</button>
               </form>
             </td>
           </tr>

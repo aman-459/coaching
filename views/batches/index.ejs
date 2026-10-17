@@ -1,44 +1,30 @@
 <% layout('layouts/boilerplate') -%>
-
 <div class="flex justify-between items-center mb-6">
   <div>
     <h1 class="text-2xl font-bold text-slate-800">Batches</h1>
-    <p class="text-sm text-slate-500">Manage all your coaching classes and schedules</p>
+    <p class="text-sm text-slate-500">Manage all your batches</p>
   </div>
-  <a href="/batches/new" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition">
-    + Add Batch
-  </a>
+  <a href="/batches/new" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition">+ Add Batch</a>
 </div>
-
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
   <% if (batches.length === 0) { %>
     <div class="col-span-full bg-white p-8 rounded-xl border border-dashed border-slate-300 text-center text-slate-500">
       No batches created yet. Click "Add Batch" to start!
     </div>
   <% } %>
-
   <% batches.forEach(batch => { %>
     <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 flex flex-col justify-between">
       <div>
         <div class="flex justify-between items-start mb-2">
           <h2 class="text-lg font-semibold text-slate-800"><%= batch.name %></h2>
-          <span class="bg-indigo-50 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-full">
-            <%= batch.subject %>
-          </span>
+          <span class="bg-indigo-50 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-full"><%= batch.subject %></span>
         </div>
-        <p class="text-sm text-slate-600 mb-1">
-          <span class="font-medium text-slate-500">Timing:</span> <%= batch.schedule || 'Not scheduled' %>
-        </p>
-        <p class="text-sm text-slate-600">
-          <span class="font-medium text-slate-500">Fee:</span> ₹<%= batch.monthlyFee %>/mo
-        </p>
+        <p class="text-sm text-slate-600 mb-1"><span class="font-medium text-slate-500">Timing:</span> <%= batch.schedule || 'Not scheduled' %></p>
+        <p class="text-sm text-slate-600"><span class="font-medium text-slate-500">Fee:</span> ₹<%= batch.monthlyFee %>/mo</p>
       </div>
-
       <div class="mt-6 pt-4 border-t border-slate-100 flex justify-between items-center">
         <span class="text-xs text-slate-500"><%= batch.students ? batch.students.length : 0 %> Students</span>
-        <a href="/batches/<%= batch._id %>" class="text-sm font-medium text-indigo-600 hover:text-indigo-800">
-          View Details →
-        </a>
+        <a href="/batches/<%= batch._id %>" class="text-sm font-medium text-indigo-600 hover:text-indigo-800">View Details →</a>
       </div>
     </div>
   <% }) %>

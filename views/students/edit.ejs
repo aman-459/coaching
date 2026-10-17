@@ -1,32 +1,24 @@
 <% layout('layouts/boilerplate') -%>
-
 <div class="max-w-xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-slate-100">
   <h1 class="text-xl font-bold text-slate-800 mb-6">Edit Student Details</h1>
-
   <form action="/students/<%= student._id %>?_method=PUT" method="POST" class="space-y-4">
     <div>
-      <label class="block text-sm font-medium text-slate-700 mb-1" for="name">Student Name</label>
-      <input type="text" id="name" name="name" value="<%= student.name %>" required
-        class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      <label class="block text-sm font-medium text-slate-700 mb-1">Student Name</label>
+      <input type="text" name="name" value="<%= student.name %>" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
     </div>
-
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1" for="phone">Student Phone</label>
-        <input type="tel" id="phone" name="phone" value="<%= student.phone %>" required
-          class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <label class="block text-sm font-medium text-slate-700 mb-1">Student Phone</label>
+        <input type="tel" name="phone" value="<%= student.phone %>" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
       </div>
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1" for="parentPhone">Parent Phone</label>
-        <input type="tel" id="parentPhone" name="parentPhone" value="<%= student.parentPhone || '' %>"
-          class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <label class="block text-sm font-medium text-slate-700 mb-1">Parent Phone</label>
+        <input type="tel" name="parentPhone" value="<%= student.parentPhone || '' %>" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
       </div>
     </div>
-
     <div>
-      <label class="block text-sm font-medium text-slate-700 mb-1" for="batchId">Select Batch</label>
-      <select id="batchId" name="batchId"
-        class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+      <label class="block text-sm font-medium text-slate-700 mb-1">Batch</label>
+      <select name="batchId" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
         <option value="">-- No Batch Assigned --</option>
         <% batches.forEach(batch => { %>
           <option value="<%= batch._id %>" <%= student.batch && student.batch.toString() === batch._id.toString() ? 'selected' : '' %>>
@@ -35,21 +27,16 @@
         <% }) %>
       </select>
     </div>
-
     <div>
-      <label class="block text-sm font-medium text-slate-700 mb-1" for="feesStatus">Fee Status</label>
-      <select id="feesStatus" name="feesStatus"
-        class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+      <label class="block text-sm font-medium text-slate-700 mb-1">Fee Status</label>
+      <select name="feesStatus" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
         <option value="Pending" <%= student.feesStatus === 'Pending' ? 'selected' : '' %>>Pending</option>
         <option value="Paid" <%= student.feesStatus === 'Paid' ? 'selected' : '' %>>Paid</option>
       </select>
     </div>
-
     <div class="flex justify-end gap-3 pt-4">
       <a href="/students" class="px-4 py-2 border border-slate-300 rounded-lg text-sm text-slate-600 hover:bg-slate-50">Cancel</a>
-      <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium shadow-sm transition">
-        Update Student
-      </button>
+      <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium shadow-sm transition">Update Student</button>
     </div>
   </form>
 </div>

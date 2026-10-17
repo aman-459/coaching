@@ -1,75 +1,86 @@
 const express = require('express');
 const router = express.Router();
 const Batch = require('../models/Batch');
+const Student = require('../models/Student');
 
-// 1. Show all batches
+// List user's batches
 router.get('/', async (req, res) => {
   try {
-    const batches = await Batch.find({});
+    const batches = await Batch.find({ owner: req.user._id });
     res.render('batches/index', { batches, title: 'All Batches' });
   } catch (err) {
-    res.status(500).send('Error loading batches');
+    res.status(500).send('Error loading batches: ' + err.message);
   }
 });
 
-// 2. Render create batch form
+// Form: New Batch
 router.get('/new', (req, res) => {
   res.render('batches/new', { title: 'Create Batch' });
 });
 
-// 3. Handle form submission
+// Create Batch
 router.post('/', async (req, res) => {
   try {
     const { name, subject, schedule, monthlyFee } = req.body;
-    await Batch.create({ name, subject, schedule, monthlyFee });
+    await Batch.create({
+      name,
+      subject,
+      schedule,
+      monthlyFee,
+      owner: req.user._id
+    });
     res.redirect('/batches');
   } catch (err) {
     res.status(400).send('Error creating batch: ' + err.message);
   }
 });
 
-// 4. Show single batch details
+// Show single batch
 router.get('/:id', async (req, res) => {
   try {
-    const batch = await Batch.findById(req.params.id).populate('students');
+    const batch = await Batch.findOne({ _id: req.params.id, owner: req.user._id }).populate('students');
     if (!batch) return res.status(404).send('Batch not found');
     res.render('batches/show', { batch, title: batch.name });
   } catch (err) {
-    res.status(500).send('Error fetching batch');
+    res.status(500).send('Error fetching batch: ' + err.message);
   }
 });
 
-// Render Edit Batch Form
+// Form: Edit Batch
 router.get('/:id/edit', async (req, res) => {
   try {
-    const batch = await Batch.findById(req.params.id);
+    const batch = await Batch.findOne({ _id: req.params.id, owner: req.user._id });
     if (!batch) return res.status(404).send('Batch not found');
     res.render('batches/edit', { batch, title: `Edit ${batch.name}` });
   } catch (err) {
-    res.status(500).send('Error loading edit page');
+    res.status(500).send('Error loading edit page: ' + err.message);
   }
 });
 
-// Update Batch (PUT)
+// Update Batch
 router.put('/:id', async (req, res) => {
   try {
     const { name, subject, schedule, monthlyFee } = req.body;
-    await Batch.findByIdAndUpdate(req.params.id, { name, subject, schedule, monthlyFee });
+    await Batch.findOneAndUpdate(
+      { _id: req.params.id, owner: req.user._id },
+      { name, subject, schedule, monthlyFee }
+    );
     res.redirect(`/batches/${req.params.id}`);
   } catch (err) {
     res.status(400).send('Error updating batch: ' + err.message);
   }
 });
 
-// Delete Batch (DELETE)
+// Delete Batch
 router.delete('/:id', async (req, res) => {
   try {
-    await Batch.findByIdAndDelete(req.params.id);
-    // Student model me batch reference unassign karna
-    await Student.updateMany({ batch: req.params.id }, { $unset: { batch: '' } });
+    const batch = await Batch.findOneAndDelete({ _id: req.params.id, owner: req.user._id });
+    if (batch) {
+      await Student.updateMany({ batch: req.params.id, owner: req.user._id }, { $unset: { batch: '' } });
+    }
     res.redirect('/batches');
   } catch (err) {
-    res.status(500).send('Error deleting batch');
+    res.status(500).send('Error deleting batch: ' + err.message);
   }
 });
 

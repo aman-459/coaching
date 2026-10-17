@@ -1,16 +1,64 @@
 <% layout('layouts/boilerplate') -%>
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="mb-8">
+  <h1 class="text-2xl font-bold text-slate-800">Coaching Overview</h1>
+  <p class="text-sm text-slate-500">Personal analytics for your classes</p>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
   <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-    <h3 class="text-sm font-semibold text-slate-400 uppercase">Total Batches</h3>
-    <p class="text-3xl font-extrabold text-indigo-600 mt-2">4</p>
+    <h3 class="text-xs font-semibold text-slate-400 uppercase">My Batches</h3>
+    <p class="text-3xl font-extrabold text-indigo-600 mt-2"><%= stats.totalBatches %></p>
   </div>
   <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-    <h3 class="text-sm font-semibold text-slate-400 uppercase">Active Students</h3>
-    <p class="text-3xl font-extrabold text-emerald-600 mt-2">48</p>
+    <h3 class="text-xs font-semibold text-slate-400 uppercase">My Students</h3>
+    <p class="text-3xl font-extrabold text-slate-800 mt-2"><%= stats.totalStudents %></p>
   </div>
   <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-    <h3 class="text-sm font-semibold text-slate-400 uppercase">Fees Pending</h3>
-    <p class="text-3xl font-extrabold text-amber-500 mt-2">12</p>
+    <h3 class="text-xs font-semibold text-slate-400 uppercase">Fees Pending</h3>
+    <p class="text-3xl font-extrabold text-amber-500 mt-2"><%= stats.pendingFeesCount %></p>
+  </div>
+  <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+    <h3 class="text-xs font-semibold text-slate-400 uppercase">Fees Cleared</h3>
+    <p class="text-3xl font-extrabold text-emerald-600 mt-2"><%= stats.paidFeesCount %></p>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-between">
+    <div>
+      <h2 class="text-lg font-bold text-slate-800 mb-2">Quick Actions</h2>
+      <p class="text-sm text-slate-500 mb-6">Frequently used actions.</p>
+    </div>
+    <div class="space-y-3">
+      <a href="/students/new" class="block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg text-sm transition">+ Enroll Student</a>
+      <a href="/batches/new" class="block w-full text-center bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 rounded-lg text-sm transition">+ Create Batch</a>
+      <a href="/attendance" class="block w-full text-center border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium py-2.5 rounded-lg text-sm transition">Take Attendance</a>
+    </div>
+  </div>
+
+  <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-lg font-bold text-slate-800">Recent Enrollments</h2>
+      <a href="/students" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">View All →</a>
+    </div>
+
+    <% if (recentStudents.length === 0) { %>
+      <p class="text-sm text-slate-400 text-center py-8">No students enrolled yet.</p>
+    <% } else { %>
+      <div class="divide-y divide-slate-100">
+        <% recentStudents.forEach(st => { %>
+          <div class="py-3 flex items-center justify-between">
+            <div>
+              <div class="font-medium text-slate-800 text-sm"><%= st.name %></div>
+              <div class="text-xs text-slate-400">Batch: <%= st.batch ? st.batch.name : 'Unassigned' %> • <%= st.phone %></div>
+            </div>
+            <span class="text-xs font-semibold px-2 py-1 rounded-full <%= st.feesStatus === 'Paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' %>">
+              <%= st.feesStatus %>
+            </span>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
   </div>
 </div>

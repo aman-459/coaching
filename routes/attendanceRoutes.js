@@ -3,32 +3,37 @@ const router = express.Router();
 const Batch = require('../models/Batch');
 const Attendance = require('../models/Attendance');
 
-// 1. Attendance Sheet View (Select Batch & Date)
 router.get('/', async (req, res) => {
   try {
-    const batches = await Batch.find({});
-    const selectedBatchId = req.query.batchId || (batches[0] ? batches[0]._id : null);
-    
-    // Default today date in YYYY-MM-DD
-    const today = new Date().toISOString().split('T')[0];
-    const selectedDate = req.query.date || today;
+    const userId = req.user._id;
+    const batches = await Batch.find({ owner: userId });
 
     let selectedBatch = null;
     let attendanceMap = {};
+    const today = new Date().toISOString().split('T')[0];
+    const selectedDate = req.query.date || today;
 
-    if (selectedBatchId) {
-      selectedBatch = await Batch.findById(selectedBatchId).populate('students');
-      
-      // Existing attendance record find karo agar pehle se mark ho
-      const existingAttendance = await Attendance.findOne({
-        batch: selectedBatchId,
-        date: selectedDate
-      });
+    if (batches.length > 0) {
+      const requestedBatchId = req.query.batchId;
+      if (requestedBatchId) {
+        selectedBatch = await Batch.findOne({ _id: requestedBatchId, owner: userId }).populate('students');
+      }
+      if (!selectedBatch) {
+        selectedBatch = await Batch.findOne({ _id: batches[0]._id, owner: userId }).populate('students');
+      }
 
-      if (existingAttendance) {
-        existingAttendance.records.forEach(r => {
-          attendanceMap[r.student.toString()] = r.status;
+      if (selectedBatch) {
+        const existingAttendance = await Attendance.findOne({
+          owner: userId,
+          batch: selectedBatch._id,
+          date: selectedDate
         });
+
+        if (existingAttendance) {
+          existingAttendance.records.forEach(r => {
+            attendanceMap[r.student.toString()] = r.status;
+          });
+        }
       }
     }
 
@@ -44,14 +49,13 @@ router.get('/', async (req, res) => {
   }
 });
 
-// 2. Save / Update Attendance
 router.post('/save', async (req, res) => {
   try {
+    const userId = req.user._id;
     const { batchId, date, attendance } = req.body;
-    // attendance object format: { [studentId]: "Present" | "Absent" }
 
-    const batch = await Batch.findById(batchId);
-    if (!batch) return res.status(404).send('Batch not found');
+    const batch = await Batch.findOne({ _id: batchId, owner: userId });
+    if (!batch) return res.status(403).send('Unauthorized batch');
 
     const records = [];
     batch.students.forEach(studentId => {
@@ -62,10 +66,9 @@ router.post('/save', async (req, res) => {
       });
     });
 
-    // Upsert (Agar entry exist kare toh update, warna insert)
     await Attendance.findOneAndUpdate(
-      { batch: batchId, date },
-      { batch: batchId, date, records },
+      { owner: userId, batch: batchId, date },
+      { owner: userId, batch: batchId, date, records },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 

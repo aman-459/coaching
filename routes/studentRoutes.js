@@ -3,46 +3,49 @@ const router = express.Router();
 const Student = require('../models/Student');
 const Batch = require('../models/Batch');
 
-// 1. All Students List
+// List user's students
 router.get('/', async (req, res) => {
   try {
-    const students = await Student.find({}).populate('batch');
+    const students = await Student.find({ owner: req.user._id }).populate('batch');
     res.render('students/index', { students, title: 'All Students' });
   } catch (err) {
     res.status(500).send('Error loading students: ' + err.message);
   }
 });
 
-// 2. Add Student Form (Batches dropdown ke liye batches fetch karenge)
+// Form: New Student
 router.get('/new', async (req, res) => {
   try {
-    const batches = await Batch.find({});
+    const batches = await Batch.find({ owner: req.user._id });
     res.render('students/new', { batches, title: 'Enroll New Student' });
   } catch (err) {
     res.status(500).send('Error loading form');
   }
 });
 
-// 3. Create Student & Link with Batch
+// Create Student
 router.post('/', async (req, res) => {
   try {
     const { name, phone, parentPhone, batchId, feesStatus } = req.body;
+
+    if (batchId) {
+      const validBatch = await Batch.findOne({ _id: batchId, owner: req.user._id });
+      if (!validBatch) return res.status(403).send('Unauthorized batch');
+    }
 
     const newStudent = new Student({
       name,
       phone,
       parentPhone,
-      batch: batchId,
-      feesStatus: feesStatus || 'Pending'
+      batch: batchId || null,
+      feesStatus: feesStatus || 'Pending',
+      owner: req.user._id
     });
 
     await newStudent.save();
 
-    // Batch ke students array me student ID push karo
     if (batchId) {
-      await Batch.findByIdAndUpdate(batchId, {
-        $push: { students: newStudent._id }
-      });
+      await Batch.findByIdAndUpdate(batchId, { $push: { students: newStudent._id } });
     }
 
     res.redirect('/students');
@@ -51,54 +54,60 @@ router.post('/', async (req, res) => {
   }
 });
 
-// 4. Quick Toggle Fees Status (Paid <-> Pending)
+// Toggle Fee Status
 router.patch('/:id/toggle-fee', async (req, res) => {
   try {
-    const student = await Student.findById(req.params.id);
+    const student = await Student.findOne({ _id: req.params.id, owner: req.user._id });
     if (!student) return res.status(404).send('Student not found');
 
     student.feesStatus = student.feesStatus === 'Paid' ? 'Pending' : 'Paid';
     await student.save();
 
-    res.redirect('back');
+    res.redirect('/students');
   } catch (err) {
-    res.status(500).send('Error updating fee status');
+    res.status(500).send('Error updating fee');
   }
 });
 
-// Render Edit Student Form
+// Form: Edit Student
 router.get('/:id/edit', async (req, res) => {
   try {
-    const student = await Student.findById(req.params.id);
-    const batches = await Batch.find({});
+    const student = await Student.findOne({ _id: req.params.id, owner: req.user._id });
     if (!student) return res.status(404).send('Student not found');
+
+    const batches = await Batch.find({ owner: req.user._id });
     res.render('students/edit', { student, batches, title: `Edit ${student.name}` });
   } catch (err) {
-    res.status(500).send('Error loading form');
+    res.status(500).send('Error loading edit form');
   }
 });
 
-// Update Student (PUT)
+// Update Student
 router.put('/:id', async (req, res) => {
   try {
     const { name, phone, parentPhone, batchId, feesStatus } = req.body;
-    const oldStudent = await Student.findById(req.params.id);
+    const student = await Student.findOne({ _id: req.params.id, owner: req.user._id });
+    if (!student) return res.status(404).send('Student not found');
 
-    // Agar batch change hua ho, toh old batch se ID remove aur new me push
-    if (oldStudent.batch && oldStudent.batch.toString() !== batchId) {
-      await Batch.findByIdAndUpdate(oldStudent.batch, { $pull: { students: oldStudent._id } });
-      if (batchId) {
-        await Batch.findByIdAndUpdate(batchId, { $push: { students: oldStudent._id } });
-      }
+    if (batchId) {
+      const validBatch = await Batch.findOne({ _id: batchId, owner: req.user._id });
+      if (!validBatch) return res.status(403).send('Unauthorized batch');
     }
 
-    await Student.findByIdAndUpdate(req.params.id, {
-      name,
-      phone,
-      parentPhone,
-      batch: batchId || null,
-      feesStatus
-    });
+    const oldBatchId = student.batch ? student.batch.toString() : null;
+    const newBatchId = batchId ? batchId.toString() : null;
+
+    if (oldBatchId !== newBatchId) {
+      if (oldBatchId) await Batch.findByIdAndUpdate(oldBatchId, { $pull: { students: student._id } });
+      if (newBatchId) await Batch.findByIdAndUpdate(newBatchId, { $push: { students: student._id } });
+    }
+
+    student.name = name;
+    student.phone = phone;
+    student.parentPhone = parentPhone;
+    student.batch = batchId || null;
+    student.feesStatus = feesStatus;
+    await student.save();
 
     res.redirect('/students');
   } catch (err) {
@@ -106,14 +115,13 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Delete Student (DELETE)
+// Delete Student
 router.delete('/:id', async (req, res) => {
   try {
-    const student = await Student.findById(req.params.id);
+    const student = await Student.findOneAndDelete({ _id: req.params.id, owner: req.user._id });
     if (student && student.batch) {
       await Batch.findByIdAndUpdate(student.batch, { $pull: { students: student._id } });
     }
-    await Student.findByIdAndDelete(req.params.id);
     res.redirect('/students');
   } catch (err) {
     res.status(500).send('Error deleting student');

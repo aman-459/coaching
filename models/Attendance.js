@@ -1,13 +1,18 @@
 const mongoose = require('mongoose');
 
 const attendanceSchema = new mongoose.Schema({
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   batch: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Batch',
     required: true
   },
   date: {
-    type: String, // Format: YYYY-MM-DD (easiest for day-level tracking)
+    type: String, // Format: YYYY-MM-DD
     required: true
   },
   records: [
@@ -26,7 +31,6 @@ const attendanceSchema = new mongoose.Schema({
   ]
 }, { timestamps: true });
 
-// Ek batch ki ek date par sirf ek attendance record ban sake
-attendanceSchema.index({ batch: 1, date: 1 }, { unique: true });
+attendanceSchema.index({ owner: 1, batch: 1, date: 1 }, { unique: true });
 
 module.exports = mongoose.model('Attendance', attendanceSchema);
